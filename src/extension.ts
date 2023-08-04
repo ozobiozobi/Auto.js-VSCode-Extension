@@ -109,12 +109,12 @@ class Extension {
         _context.subscriptions
       );
     }
-    this.qrCodeViewPanel.webview.html = Extension.getQrCodeHtml(url)
+    this.qrCodeViewPanel.webview.html = Extension.getQrCodeHtml(url,this.qrCodeViewPanel)
   }
 
-  private static getQrCodeHtml(text: string): string {
-    const icon = Extension.getVscodeResourceUrl("logo.png")
-    const qrcodejs = Extension.getVscodeResourceUrl("assets/qrcode.js")
+  private static getQrCodeHtml(text: string,viewPanel:vscode.WebviewPanel): string {
+    const icon = viewPanel.webview.asWebviewUri(vscode.Uri.file(path.join(_context.extensionPath,'logo.png')))
+    const qrcodejs = viewPanel.webview.asWebviewUri(vscode.Uri.file(path.join(_context.extensionPath,'assets','qrcode.js'))) 
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -143,12 +143,6 @@ class Extension {
     </script>
 </body>
 </html>`
-  }
-
-  private static getVscodeResourceUrl(relativePath: string): string {
-    return vscode.Uri.file(
-      path.join(_context.extensionPath, relativePath)
-    ).with({ scheme: 'vscode-resource' }).toString();
   }
 
   openDocument() {
