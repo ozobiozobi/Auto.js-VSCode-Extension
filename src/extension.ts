@@ -6,12 +6,12 @@ import { ProjectTemplate, Project } from './project';
 import * as fs from 'fs'
 import * as path from "path";
 
-let server = new AutoJsDebugServer(9317);
+const server = new AutoJsDebugServer(9317);
 let recentDevice = null;
 server
   .on('connect', () => {
-    let servers = server.getIPs().join(":" + server.getPort() + " or ") + ":" + server.getPort();
-    let showQrcode = "Show QR code"
+    const servers = server.getIPs().join(":" + server.getPort() + " or ") + ":" + server.getPort();
+    const showQrcode = "Show QR code"
     vscode.window.showInformationMessage(`Auto.js Autox.js \r\n server running on ${servers}`, showQrcode).then((result) => {
       if (result === showQrcode) {
         vscode.commands.executeCommand("extension.showQrCode")
@@ -38,7 +38,7 @@ server
   })
   .on('new_device', (device: Device) => {
     let messageShown = false;
-    let showMessage = () => {
+    const showMessage = () => {
       if (messageShown)
         return;
       vscode.window.showInformationMessage('New device attached: ' + device);
@@ -48,7 +48,7 @@ server
     device.on('data:device_name', showMessage);
     // device.send("hello","打开连接");
   })
-  .on('cmd', (cmd: String, url: String) => {
+  .on('cmd', (cmd: string, url: string) => {
     switch (cmd) {
       case "save":
         extension.saveProject(url);
@@ -69,17 +69,17 @@ server
 
 
 class Extension {
-  private documentViewPanel: any = undefined;
-  private qrCodeViewPanel: any = undefined;
+  private documentViewPanel: vscode.WebviewPanel | undefined = undefined;
+  private qrCodeViewPanel: vscode.WebviewPanel | undefined = undefined;  
   private documentCache: Map<string, string> = new Map<string, string>();
 
   showServerAddress() {
-    let servers = server.getIPs().join(":" + server.getPort() + " or ") + ":" + server.getPort();
+    const servers = server.getIPs().join(":" + server.getPort() + " or ") + ":" + server.getPort();
     vscode.window.showInformationMessage(`Auto.js Autox.js \r\n server running on ${servers}`)
   }
 
   showQrCode() {
-    let ips = server.getIPs()
+    const ips = server.getIPs()
     if (ips.length == 1) {
       this.showQrcodeWebview(ips[0])
     } else {
@@ -92,7 +92,7 @@ class Extension {
   }
 
   private showQrcodeWebview(ip: string) {
-    let url = `ws://${ip}:${server.getPort()}`
+    const url = `ws://${ip}:${server.getPort()}`
     if (!this.qrCodeViewPanel) {
       this.qrCodeViewPanel = vscode.window.createWebviewPanel(
         'Qr code',
@@ -147,16 +147,16 @@ class Extension {
 
   openDocument() {
     if (this.documentViewPanel) {
-      this.documentViewPanel.reveal((vscode.ViewColumn as any).Beside);
+      this.documentViewPanel.reveal(vscode.ViewColumn.Beside as unknown as vscode.ViewColumn);
     } else {
       // 1.创建并显示Webview
-      this.documentViewPanel = (vscode.window as any).createWebviewPanel(
+      this.documentViewPanel = vscode.window.createWebviewPanel(
         // 该webview的标识，任意字符串
         'Autox.js Document',
         // webview面板的标题，会展示给用户
         'Autox.js开发文档',
         // webview面板所在的分栏
-        (vscode.ViewColumn as any).Beside,
+        vscode.ViewColumn.Beside,
         // 其它webview选项
         {
           // Enable scripts in the webview
@@ -167,7 +167,7 @@ class Extension {
       // Handle messages from the webview
       this.documentViewPanel.webview.onDidReceiveMessage(message => {
         // console.log('插件收到的消息：' + message.href);
-        let href = message.href.substring(message.href.indexOf("\/electron-browser\/") + 18);
+        const href = message.href.substring(message.href.indexOf("/electron-browser/") + 18);
         // console.log("得到uri：" + href)
         this.loadDocument(href)
       }, undefined, _context.subscriptions);
@@ -186,7 +186,7 @@ class Extension {
     }
   }
 
-  private loadDocument(url) {
+  private loadDocument(url: string) { // 明确 url 参数的类型为 string
     try {
       let cache = this.documentCache.get(url);
       if (!cache) {
@@ -250,26 +250,26 @@ class Extension {
   }
 
   async manuallyConnectADB() {
-    let devices = await server.listADBDevices()
-    let names = await Promise.all(devices.map(async (device) => {
-      let adbDevice = server.adbClient.getDevice(device.id)
-      let brand = await server.adbShell(adbDevice, "getprop ro.product.brand")
-      let model = await server.adbShell(adbDevice, "getprop ro.product.model")
+    const devices = await server.listADBDevices()
+    const names = await Promise.all(devices.map(async (device) => {
+      const adbDevice = server.adbClient.getDevice(device.id)
+      const brand = await server.adbShell(adbDevice, "getprop ro.product.brand")
+      const model = await server.adbShell(adbDevice, "getprop ro.product.model")
       return `${brand} ${model}: ${device.id}`
     }));
     vscode.window.showQuickPick(names)
       .then(name => {
-        let device = devices[names.indexOf(name)]
+        const device = devices[names.indexOf(name)]
         server.connectDevice(device.id)
       });
   }
 
   manuallyDisconnect() {
-    let devices = server.devices
-    let names = devices.map((device) => { return device.name + ": " + device.id })
+    const devices = server.devices
+    const names = devices.map((device) => { return device.name + ": " + device.id })
     vscode.window.showQuickPick(names)
       .then(name => {
-        let device = devices[names.indexOf(name)]
+        const device = devices[names.indexOf(name)]
         server.getDeviceById(device.id).close()
       });
   }
@@ -298,7 +298,7 @@ class Extension {
     let text = "";
     let filename = null;
     if (url != null) {
-      let uri = vscode.Uri.parse(url);
+      const uri = vscode.Uri.parse(url);
       filename = uri.fsPath;
       console.log("fileName-->", filename);
       try {
@@ -307,7 +307,7 @@ class Extension {
         console.error(error);
       }
     } else {
-      let editor = vscode.window.activeTextEditor;
+      const editor = vscode.window.activeTextEditor;
       console.log("dfn", editor.document.fileName);
       filename = editor.document.fileName;
       text = editor.document.getText();
@@ -325,23 +325,23 @@ class Extension {
   selectDevice(callback) {
     let devices: Array<Device> = server.devices;
     if (recentDevice) {
-      let i = devices.indexOf(recentDevice);
+      const i = devices.indexOf(recentDevice);
       if (i > 0) {
         devices = devices.slice(0);
         devices[i] = devices[0];
         devices[0] = recentDevice;
       }
     }
-    let names = devices.map(device => device.toString());
+    const names = devices.map(device => device.toString());
     vscode.window.showQuickPick(names)
       .then(select => {
-        let device = devices[names.indexOf(select)];
+        const device = devices[names.indexOf(select)];
         recentDevice = device;
         callback(device);
       });
   }
   runOn(target: AutoJsDebugServer | Device) {
-    let editor = vscode.window.activeTextEditor;
+    const editor = vscode.window.activeTextEditor;
     target.sendCommand('run', {
       'id': editor.document.fileName,
       'name': editor.document.fileName,
@@ -362,7 +362,7 @@ class Extension {
     let text = "";
     let filename: string;
     if (null != url) {
-      let uri = vscode.Uri.parse(url);
+      const uri = vscode.Uri.parse(url);
       filename = uri.fsPath;
       console.log("fileName-->", filename);
       try {
@@ -371,7 +371,7 @@ class Extension {
         console.error(error);
       }
     } else {
-      let editor = vscode.window.activeTextEditor;
+      const editor = vscode.window.activeTextEditor;
       filename = editor.document.fileName;
       text = editor.document.getText();
     }
@@ -411,7 +411,7 @@ class Extension {
     console.log("url-->", url);
     let folder = null;
     if (url == null) {
-      let folders = vscode.workspace.workspaceFolders;
+      const folders = vscode.workspace.workspaceFolders;
       if (!folders || folders.length == 0) {
         vscode.window.showInformationMessage("请打开一个项目的文件夹");
         return null;
@@ -438,7 +438,7 @@ class Extension {
 
 
 export let _context: vscode.ExtensionContext;
-let extension = new Extension();
+const extension = new Extension();
 const commands = ['startAllServer', 'stopAllServer', 'startServer', 'stopServer', 'startTrackADBDevices',
   'stopTrackADBDevices', 'manuallyConnectADB', 'manuallyDisconnect', 'showServerAddress', 'showQrCode', 'openDocument', 'run', 'runOnDevice',
   'stop', 'stopAll', 'rerun', 'save', 'saveToDevice', 'newProject', 'runProject', 'saveProject'];
@@ -446,10 +446,10 @@ const commands = ['startAllServer', 'stopAllServer', 'startServer', 'stopServer'
 export function activate(context: vscode.ExtensionContext) {
   console.log('extension "Autox.js-VSCode-Extension " is now active.');
   commands.forEach((command) => {
-    let action: Function = extension[command];
+    const action = extension[command as keyof Extension] as (...args: unknown[]) => void;
     context.subscriptions.push(vscode.commands.registerCommand('extension.' + command, action.bind(extension)));
     _context = context;
-    // @ts-ignore
+
     console.log(context.extension.packageJSON.version)
   })
 }

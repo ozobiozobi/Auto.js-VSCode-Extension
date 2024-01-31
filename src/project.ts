@@ -7,6 +7,9 @@ import * as path from 'path'
 import * as cryto from 'crypto'
 import * as walk from 'walk'
 import * as streamBuffers from 'stream-buffers'
+import * as crypto from 'crypto';
+import { WritableStreamBuffer } from 'stream-buffers';
+
 
 export class ProjectTemplate {
 
@@ -17,23 +20,23 @@ export class ProjectTemplate {
     }
 
     build(): Thenable<Uri> {
-        var projectConfig = new ProjectConfig();
+        const projectConfig = new ProjectConfig();
         projectConfig.name = "新建项目";
         projectConfig.main = "main.js";
         projectConfig.ignore = ["build"];
         projectConfig.packageName = "com.example";
         projectConfig.versionName = "1.0.0";
         projectConfig.versionCode = 1;
-        var uri = this.uri;
-        var jsonFilePath = path.join(uri.fsPath, "project.json");
-        var mainFilePath = path.join(uri.fsPath, "main.js");
+        const uri = this.uri;
+        const jsonFilePath = path.join(uri.fsPath, "project.json");
+        const mainFilePath = path.join(uri.fsPath, "main.js");
         if(fs.existsSync(mainFilePath)){
           fs.renameSync(mainFilePath,mainFilePath+".backup");
         }
         if(fs.existsSync(jsonFilePath)){
           fs.renameSync(jsonFilePath,jsonFilePath+".backup");
         }
-        var mainScript = "toast('Hello, AutoX.js');";
+        const mainScript = "toast('Hello, AutoX.js');";
         return projectConfig.save(jsonFilePath)
             .then(() => {
                 return new Promise<Uri>(function (res, rej) {
@@ -52,9 +55,9 @@ export class ProjectTemplate {
 export class Project {
     config: ProjectConfig;
     folder: Uri;
-    fileFilter = (relativePath: string, absPath: string, stats: fs.Stats) => {
+    fileFilter = (relativePath: string, absPath: string) => {
         return this.config.ignore.filter(p => {
-            var fullPath = path.join(this.folder.fsPath, p);
+            const fullPath = path.join(this.folder.fsPath, p);
             return absPath.startsWith(fullPath);
         }).length == 0;
     };
@@ -63,7 +66,7 @@ export class Project {
     constructor(folder: Uri) {
         this.folder = folder;
         this.config = ProjectConfig.fromJsonFile(path.join(this.folder.fsPath, "project.json"));
-        this.watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder.fsPath, "project\.json"));
+        this.watcher = vscode.workspace.createFileSystemWatcher(new vscode.RelativePattern(folder.fsPath, "project.json"));
         this.watcher.onDidChange((event) => {
             console.log("file changed: ", event.fsPath);
             if (event.fsPath == path.join(this.folder.fsPath, "project.json")) {
@@ -94,22 +97,24 @@ export class ProjectObserser {
     diff(): Promise<{ buffer: Buffer, md5: string }> {
         return this.fileObserver.walk()
             .then(changedFiles => {
-                var zip = archiver('zip')
-                var streamBuffer: any = new streamBuffers.WritableStreamBuffer();
+                const zip = archiver('zip')
+                
+                const streamBuffer: WritableStreamBuffer = new WritableStreamBuffer();
                 zip.pipe(streamBuffer);
                 changedFiles.forEach(relativePath => {
                     zip.append(fs.createReadStream(path.join(this.folder, relativePath)), { name: relativePath })
                 });
                 zip.finalize();
-                return new Promise<Buffer>((res, rej) => {
+                return new Promise<Buffer>((res) => {
                     zip.on('finish', () => {
-                        streamBuffer.end();
-                        res(streamBuffer.getContents());
+                        const contents = streamBuffer.getContents() || Buffer.alloc(0); // 如果getContents()返回false，则创建一个空的Buffer
+                        res(contents); // 现在contents保证是一个Buffer实例
                     });
+                    
                 });
             })
             .then(buffer => {
-                var md5 = cryto.createHash('md5').update(buffer).digest('hex');
+                const md5 = cryto.createHash('md5').update(buffer).digest('hex');
                 return {
                     buffer: buffer,
                     md5: md5
@@ -118,14 +123,14 @@ export class ProjectObserser {
     }
 
     zip(): Promise<{ buffer: Buffer, md5: string }> {
-        return new Promise<{ buffer: Buffer, md5: string }>((res, rej) => {
-            var walker = walk.walk(this.folder);
-            var zip = archiver('zip')
-            var streamBuffer: any = new streamBuffers.WritableStreamBuffer();
+        return new Promise<{ buffer: Buffer, md5: string }>((resolve) => {
+            const walker = walk.walk(this.folder);
+            const zip = archiver('zip');
+            const streamBuffer = new streamBuffers.WritableStreamBuffer();
             zip.pipe(streamBuffer);
             walker.on("file", (root, stat, next) => {
-                var filePath = path.join(root, stat.name);
-                var relativePath = path.relative(this.folder, filePath);
+                const filePath = path.join(root, stat.name);
+                const relativePath = path.relative(this.folder, filePath);
                 if (!this.fileFilter(relativePath, filePath, stat)) {
                     next();
                     return;
@@ -135,15 +140,25 @@ export class ProjectObserser {
             });
             walker.on("end", () => {
                 zip.finalize();
-                return new Promise<Buffer>((res, rej) => {
-                    zip.on('finish', () => {
-                        streamBuffer.end();
-                        res(streamBuffer.getContents());
-                    });
+                zip.on('finish', () => {
+    const contents = streamBuffer.getContents();
+    // Check if contents is actually a Buffer, not false
+    if (contents instanceof Buffer) {
+        // Proceed with the Buffer
+        const md5 = crypto.createHash('md5').update(contents).digest('hex');
+        streamBuffer.end();
+        resolve({ buffer: contents, md5 });
+    } else {
+        // Handle the case where no contents were returned
+        // For example, by rejecting the promise or resolving with an empty Buffer
+        resolve({ buffer: Buffer.alloc(0), md5: '' }); // Example with an empty Buffer
+    }
+});
+                zip.on('error', (error) => {
+                    throw error; // 抛出错误
                 });
-            })
+            });
         });
-
     }
 }
 
@@ -154,8 +169,8 @@ export class LaunchConfig {
 export class ProjectConfig {
     name: string;
     icon: string;
-    packageName: String;
-    main: String;
+    packageName: string;
+    main: string;
     versionCode: number;
     versionName: string;
     ignore: string[];
@@ -163,7 +178,7 @@ export class ProjectConfig {
 
     save(path: string) {
         return new Promise((res, rej) => {
-            var json = JSON.stringify(this, null, 4);
+            const json = JSON.stringify(this, null, 4);
             fs.writeFile(path, json, function (err) {
                 if (err) {
                     rej(err);
@@ -175,14 +190,14 @@ export class ProjectConfig {
     }
 
     static fromJson(text: string): ProjectConfig {
-        var config = JSON.parse(text) as ProjectConfig;
+        const config = JSON.parse(text) as ProjectConfig;
         config.ignore = (config.ignore || []).map(p => path.normalize(p));
         return config;
     }
 
     static fromJsonFile(path: string): ProjectConfig {
-        var text = fs.readFileSync(path).toString("utf-8");
-        var config = JSON.parse(text) as ProjectConfig;
+        const text = fs.readFileSync(path).toString("utf-8");
+        const config = JSON.parse(text) as ProjectConfig;
         config.ignore = (config.ignore || []);
         return config;
     }

@@ -3,7 +3,6 @@ import * as ws from 'websocket';
 import * as http from 'http';
 import * as querystring from 'querystring';
 import * as url from 'url';
-import * as fs from 'fs'
 import { Project, ProjectObserser } from './project';
 import * as vscode from "vscode";
 import Adb, { DeviceClient, Forward } from '@devicefarmer/adbkit';
@@ -12,13 +11,17 @@ import ADBDevice from '@devicefarmer/adbkit/dist/src/Device';
 import internal from "stream";
 import buffer from "buffer";
 import { _context } from "./extension";
+import os from 'os';
+import { AddressInfo } from "net";
+
 const DEBUG = false;
 
-function logDebug(message?: any, ...optionalParams: any[]) {
+function logDebug(message?: unknown, ...optionalParams: unknown[]) {
   if (DEBUG) {
-    console.log.apply(console, arguments);
+    console.log(message, ...optionalParams); // 使用扩展运算符代替.apply()
   }
 }
+
 
 
 const HANDSHAKE_TIMEOUT = 10 * 1000;
@@ -41,10 +44,9 @@ export class Device extends EventEmitter {
       logDebug("on client hello: ", data);
       this.attached = true;
       this.name = data['device_name'];
-      let message_id = `${Date.now()}_${Math.random()}`;
-      let appVersionCode = data['app_version_code']
-      // @ts-ignore
-      let extensionVersion = _context.extension.packageJSON.version
+      const message_id = `${Date.now()}_${Math.random()}`;
+      const appVersionCode = data['app_version_code']
+      const extensionVersion = _context.extension.packageJSON.version
       let returnData
       if (appVersionCode >= 629) {
         returnData = JSON.stringify({ message_id, data: "ok", version: extensionVersion, debug: DEBUG, type: 'hello' })
@@ -57,8 +59,7 @@ export class Device extends EventEmitter {
     });
     this.on('data:ping', data => {
       logDebug("on client ping: ", data);
-      let message_id = `${Date.now()}_${Math.random()}`;
-      var returnData = JSON.stringify({ type: 'pong', data: data })
+      const returnData = JSON.stringify({ type: 'pong', data: data })
       logDebug("pong: ", returnData)
       this.connection.sendUTF(returnData);
     })
@@ -72,15 +73,15 @@ export class Device extends EventEmitter {
   }
 
   close() {
-    let message_id = `${Date.now()}_${Math.random()}`;
-    let closeMessage = JSON.stringify({ message_id, data: "close", debug: false, type: 'close' })
+    const message_id = `${Date.now()}_${Math.random()}`;
+    const closeMessage = JSON.stringify({ message_id, data: "close", debug: false, type: 'close' })
     this.connection.sendUTF(closeMessage);
     this.connection.close();
     this.connection = null;
   }
 
-  send(type: string, data: any): void {
-    let message_id = `${Date.now()}_${Math.random()}`;
+  send(type: string, data: unknown): void {
+    const message_id = `${Date.now()}_${Math.random()}`;
     console.log(data);
     this.connection.sendUTF(JSON.stringify({
       type: type,
@@ -96,7 +97,7 @@ export class Device extends EventEmitter {
   sendBytesCommand(command: string, md5: string, data: object = {}): void {
     data = Object(data);
     data['command'] = command;
-    let message_id = `${Date.now()}_${Math.random()}`;
+    const message_id = `${Date.now()}_${Math.random()}`;
     this.connection.sendUTF(JSON.stringify({
       type: 'bytes_command',
       message_id,
@@ -123,7 +124,7 @@ export class Device extends EventEmitter {
       logDebug("message: ", message);
       if (message.type == 'utf8') {
         try {
-          let json = JSON.parse(message.utf8Data);
+          const json = JSON.parse(message.utf8Data);
           logDebug("json: ", json);
           this.emit('message', json);
           this.emit('data:' + json['type'], json['data']);
@@ -150,11 +151,11 @@ export class AutoJsDebugServer extends EventEmitter {
   public devices: Array<Device> = [];
   public project: Project = null;
   private logChannels: Map<string, vscode.OutputChannel>;
-  private fileFilter = (relativePath: string, absPath: string, stats: fs.Stats) => {
+  private fileFilter = (relativePath: string, absPath: string) => {
     if (!this.project) {
       return true;
     }
-    return this.project.fileFilter(relativePath, absPath, stats);
+    return this.project.fileFilter(relativePath, absPath);
   };
 
   constructor(port: number) {
@@ -163,9 +164,9 @@ export class AutoJsDebugServer extends EventEmitter {
     this.port = port;
     this.httpServer = http.createServer((request, response) => {
       console.log(new Date() + ' Received request for ' + request.url);
-      var urlObj = url.parse(request.url);
-      var query = urlObj.query;
-      var queryObj = querystring.parse(query);
+      const urlObj = url.parse(request.url);
+      const query = urlObj.query;
+      const queryObj = querystring.parse(query);
       if (urlObj.pathname == "/exec") {
         response.writeHead(200);
         response.end("this commond is:" + queryObj.cmd + "-->" + queryObj.path);
@@ -176,9 +177,9 @@ export class AutoJsDebugServer extends EventEmitter {
         response.end();
       }
     });
-    let wsServer = new ws.server({ httpServer: this.httpServer, keepalive: true, keepaliveInterval: 10000 });
+    const wsServer = new ws.server({ httpServer: this.httpServer, keepalive: true, keepaliveInterval: 10000 });
     wsServer.on('request', request => {
-      let connection = request.accept();
+      const connection = request.accept();
       if (!connection) {
         return;
       }
@@ -193,43 +194,44 @@ export class AutoJsDebugServer extends EventEmitter {
   }
 
   private newDevice(connection: ws.connection, type: string, id: string) {
-    let device = new Device(connection, type, id);
+    const device = new Device(connection, type, id);
     logDebug(connection.state, "--->status")
     device
       .on("attach", (device) => {
         this.attachDevice(device);
         this.emit('new_device', device);
-        let logChannel = this.newLogChannel(device);
+        const logChannel = this.newLogChannel(device);
         logChannel.appendLine(`Device connected: ${device}`);
       })
   }
 
   async adbShell(device: DeviceClient, command: string): Promise<string> {
-    let duplex: internal.Duplex = await device.shell(command)
-    // @ts-ignore
-    let brandBuf: buffer.Buffer = await Adb.util.readAll(duplex)
+    const duplex: internal.Duplex = await device.shell(command)
+    const brandBuf: buffer.Buffer = await Adb.util.readAll(duplex)
     return brandBuf.toString()
   }
 
-  private connectAutoxjsByADB(port: Number, deviceId: string) {
-    let autoJsDebugServer = this
-    let url = `ws://localhost:${port}/`
-
-    var client = new ws.client();
-
-    client.on('connectFailed', function (error) {
-      let err = 'Connect Error: ' + error.toString()
+  private connectAutoxjsByADB(port: number, deviceId: string) {
+    // 删除了不必要的autoJsDebugServer声明
+    const url = `ws://localhost:${port}/`;
+  
+    const client = new ws.client();
+  
+    client.on('connectFailed', (error) => {
+      // 直接在这里使用 this
+      const err = 'Connect Error: ' + error.toString();
       console.log(err);
-      vscode.window.showInformationMessage(err)
+      vscode.window.showInformationMessage(err);
     });
-
-    client.on('connect', function (connection) {
-      console.log("connected to " + url)
-      autoJsDebugServer.newDevice(connection, "adb", deviceId)
+  
+    client.on('connect', (connection) => {
+      // 直接在这里使用 this
+      console.log("connected to " + url);
+      this.newDevice(connection, "adb", deviceId);
     });
     client.connect(url);
   }
-
+  
   listen(): void {
     if (this.isHttpServerStarted) {
       this.emit("connected");
@@ -241,8 +243,8 @@ export class AutoJsDebugServer extends EventEmitter {
     });
     this.httpServer.listen(this.port, '0.0.0.0', () => {
       this.isHttpServerStarted = true
-      const address: any = this.httpServer.address();
-      var localAddress = this.getIPAddress();
+      const address = this.httpServer.address() as AddressInfo;
+      const localAddress = this.getIPAddress();
       console.log(`server listening on ${localAddress}:${address.port} / ${address.address}:${address.port}`);
       this.emit("connect");
     });
@@ -254,67 +256,66 @@ export class AutoJsDebugServer extends EventEmitter {
   }
 
   async trackADBDevices() {
-    let thisServer = this
-    let devices = await thisServer.adbClient.listDevices()
-    for (let device0 of devices) {
-      await thisServer.connectDevice(device0.id)
+    // 删除了不必要的thisServer声明
+    const devices = await this.adbClient.listDevices();
+    for (const device0 of devices) {
+      await this.connectDevice(device0.id);
     }
     if (this.tracker) {
       this.emit("adb:tracking_started");
-      return
+      return;
     }
     try {
-      let tracker = await thisServer.adbClient.trackDevices()
-      thisServer.tracker = tracker
-      tracker.on('add', async function (device0) {
-        console.log("adb device " + device0.id + " added")
-        const device = thisServer.adbClient.getDevice(device0.id)
-        await device.waitForDevice()
-        await thisServer.connectDevice(device0.id, device)
-      })
-      tracker.on('remove', function (device) {
-        console.log("adb device " + device.id + " removed")
-        let wsDevice = thisServer.getDeviceById(device.id)
+      const tracker = await this.adbClient.trackDevices();
+      this.tracker = tracker;
+      tracker.on('add', async (device0) => {
+        console.log("adb device " + device0.id + " added");
+        const device = this.adbClient.getDevice(device0.id);
+        await device.waitForDevice();
+        await this.connectDevice(device0.id, device);
+      });
+      tracker.on('remove', (device) => {
+        console.log("adb device " + device.id + " removed");
+        const wsDevice = this.getDeviceById(device.id);
         if (wsDevice) {
-          wsDevice.close()
+          wsDevice.close();
         }
-
-      })
-      tracker.on('end', function () {
-        thisServer.tracker = undefined
-        console.log('ADB Tracking stopped')
-        thisServer.emit("adb:tracking_stop")
-      })
+      });
+      tracker.on('end', () => {
+        // 直接在这里使用 this
+        this.tracker = undefined;
+        console.log('ADB Tracking stopped');
+        this.emit("adb:tracking_stop");
+      });
     } catch (err) {
-      this.tracker = undefined
-      thisServer.emit("adb:tracking_error")
-      console.error('ADB error: ', err.stack)
+      this.tracker = undefined;
+      this.emit("adb:tracking_error");
+      console.error('ADB error: ', err.stack);
     }
-
+  
     this.emit("adb:tracking_start");
   }
-
   async connectDevice(id: string, device: DeviceClient = undefined) {
     if (!device) device = this.adbClient.getDevice(id)
-    let wsDevice = this.getDeviceById(id)
+    const wsDevice = this.getDeviceById(id)
     if (wsDevice && wsDevice.attached) return
     let forwards: Forward[] = await this.listForwards(device, id)
     if (forwards.length == 0) {
-      let forwarded = await device.forward(`tcp:0`, `tcp:9317`)
+      const forwarded = await device.forward(`tcp:0`, `tcp:9317`)
       if (forwarded) {
         forwards = await this.listForwards(device, id)
       }
     }
     if (forwards.length > 0) {
-      let forward = forwards[0]
+      const forward = forwards[0]
       console.log(`forward ${id}: local -> ${forward.local}, remote -> ${forward.remote}`)
-      let port = Number(forward.local.replace("tcp:", ""))
+      const port = Number(forward.local.replace("tcp:", ""))
       this.connectAutoxjsByADB(port, id)
     }
   }
 
   private async listForwards(device: DeviceClient, id: string): Promise<Forward[]> {
-    let forwards: Forward[] = await device.listForwards()
+    const forwards: Forward[] = await device.listForwards()
     return forwards.filter((forward) => {
       return forward.serial == id && forward.remote == "tcp:9317"
     })
@@ -327,7 +328,7 @@ export class AutoJsDebugServer extends EventEmitter {
     }
   }
 
-  send(type: string, data: any): void {
+  send(type: string, data: unknown): void {
     this.devices.forEach(device => {
       device.send(type, data);
     });
@@ -346,7 +347,7 @@ export class AutoJsDebugServer extends EventEmitter {
   }
 
   sendProjectCommand(folder: string, command: string) {
-    let startTime = new Date().getTime();
+    const startTime = new Date().getTime();
     this.devices.forEach(device => {
       if (device.projectObserser == null || device.projectObserser.folder != folder) {
         device.projectObserser = new ProjectObserser(folder, this.fileFilter);
@@ -384,26 +385,26 @@ export class AutoJsDebugServer extends EventEmitter {
 
   /** 获取本地IP */
   getIPAddress(): string {
-    var interfaces = require('os').networkInterfaces();
-    for (var devName in interfaces) {
-      var iface = interfaces[devName];
-      for (var i = 0; i < iface.length; i++) {
-        var alias = iface[i];
-        console.log("---", alias)
+    const interfaces = os.networkInterfaces();
+    for (const devName in interfaces) {
+      const iface = interfaces[devName];
+      for (let i = 0; i < iface.length; i++) {
+        const alias = iface[i];
         if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
           return alias.address;
         }
       }
     }
+    return '127.0.0.1';
   }
   /** 获取本地IP */
   getIPs(): string[] {
-    var ips = [];
-    var interfaces = require('os').networkInterfaces();
-    for (var devName in interfaces) {
-      var iface = interfaces[devName];
-      for (var i = 0; i < iface.length; i++) {
-        var alias = iface[i];
+    const ips = [];
+    const interfaces = os.networkInterfaces();
+    for (const devName in interfaces) {
+      const iface = interfaces[devName];
+      for (let i = 0; i < iface.length; i++) {
+        const alias = iface[i];
         console.log("---", alias)
         if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
           ips.push(alias.address);
@@ -432,17 +433,17 @@ export class AutoJsDebugServer extends EventEmitter {
     this.devices.splice(this.devices.indexOf(device), 1);
     console.log("detachDevice: " + device);
     vscode.window.showInformationMessage(`Device disconnected: ${device}`)
-    var logChannel = this.getLogChannel(device)
+    const logChannel = this.getLogChannel(device)
     logChannel.dispose();
     this.logChannels.delete(device.toString())
   }
 
   /** 创建设备日志打印通道 */
   private newLogChannel(device: Device): vscode.OutputChannel {
-    let channelName = device.toString();
+    const channelName = device.toString();
     // let logChannel = this.logChannels.get(channelName);
     // if (!logChannel) {
-    let logChannel = vscode.window.createOutputChannel(channelName);
+    const logChannel = vscode.window.createOutputChannel(channelName);
     this.logChannels.set(channelName, logChannel);
     // }
     logChannel.show(true);
@@ -452,7 +453,7 @@ export class AutoJsDebugServer extends EventEmitter {
 
   /** 获取设备日志打印通道 */
   private getLogChannel(device: Device): vscode.OutputChannel {
-    let channelName = device.toString();
+    const channelName = device.toString();
     // console.log("获取日志通道：" + channelName);
     return this.logChannels.get(channelName);
   }

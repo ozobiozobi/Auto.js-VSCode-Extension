@@ -1,71 +1,50 @@
-import * as fs from 'fs'
-import * as walk from 'walk'
-import * as path from 'path'
+import * as fs from 'fs';
+import * as path from 'path';
 
-export type FileFilter = ((relativePath: string, path: string, stats: fs.Stats) => boolean)
+export type FileFilter = (relativePath: string, filePath: string, stats: fs.Stats) => boolean;
 
 export class FileObserver {
+    private dir: string;
+    private files = new Map<string, number>();
+    private filter: FileFilter;
 
-    private dir: string
-    private files = new Map<string, number>()
-    private filter: FileFilter
-
-
-    constructor(dirPath: string, filter: FileFilter = null) {
+    constructor(dirPath: string, filter: FileFilter = (() => true)) {
         this.dir = dirPath;
         this.filter = filter;
     }
 
-    walk() {
-        return new Promise<string[]>((res, rej) => {
-            var changedFiles = [];
-            this.getFiels(this.dir, changedFiles, rej);
-            res(changedFiles);
-            // var walker = walk.walk(this.dir);
-            // walker.on("file", (root, stat, next) => {
-            //     var filePath = path.join(root, stat.name);
-            //     var relativePath = path.relative(this.dir, filePath);
-            //     if (this.filter && !this.filter(relativePath, filePath, stat)) {
-            //         next();
-            //         return;
-            //     }
-            //     var millis = stat.mtime.getTime();
-            //     if (this.files.has(filePath) && this.files.get(filePath)
-            //         == millis) {
-            //         next();
-            //         return;
-            //     }
-            //     this.files.set(filePath, millis);
-            //     changedFiles.push(relativePath);
-            //     next();
-            // })
-            // walker.on("end", () => {
-            //     res(changedFiles);
-            // });
-            // walker.on("nodeError", err => {
-            //     rej(err);
-            // })
+    walk(): Promise<string[]> {
+        return new Promise<string[]>((resolve, reject) => {
+            const changedFiles: string[] = [];
+            this.getFiles(this.dir, changedFiles, reject);
+            resolve(changedFiles);
         });
-
     }
-    getFiels(rootPath: string, fileList: string[], rej) {
-        let files = fs.readdirSync(rootPath, {withFileTypes: true});
-        files.filter((f: any) => {
-            var filePath = path.join(rootPath, f.name);
-            // console.log(filePath + ":" + this.filter(null, filePath, null))
-            return this.filter(null, filePath, null);
-        }).forEach((f: any) => {
-            let filePath = path.join(rootPath, f.name);
-            let relativePath = path.relative(this.dir, filePath);
-            if (f.isDirectory()) {
-                // console.log("目录：" + f.name)
-                this.getFiels(filePath, fileList, rej);
-            } else if (f.isFile()) {
-                // console.log("文件：" + f.name)
-                fileList.push(relativePath);
-            } else {
-                // console.log("未知类型：" + f.name)
+
+    private getFiles(rootPath: string, fileList: string[], reject: (reason?: Error) => void): void {
+        let files: fs.Dirent[];
+        try {
+            files = fs.readdirSync(rootPath, { withFileTypes: true });
+        } catch (error) {
+            reject(error);
+            return;
+        }
+
+        for (const dirent of files) {
+            const filePath = path.join(rootPath, dirent.name);
+            const relativePath = path.relative(this.dir, filePath);
+            if (dirent.isDirectory()) {
+                this.getFiles(filePath, fileList, reject); // 递归调用处理目录
+            } else if (dirent.isFile()) {
+                const stats = fs.statSync(filePath);
+                if (this.filter(relativePath, filePath, stats)) {
+                    const millis = stats.mtime.getTime();
+                    if (!this.files.has(filePath) || this.files.get(filePath) !== millis) {
+                        this.files.set(filePath, millis);
+                        fileList.push(relativePath);
+                    }
+                }
             }
-        });
+        }
     }
 }
