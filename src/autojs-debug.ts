@@ -3,7 +3,7 @@ import * as ws from 'websocket';
 import * as http from 'http';
 import * as querystring from 'querystring';
 import * as url from 'url';
-import { Project, ProjectObserser } from './project';
+import { Project, ProjectObserver } from './project';
 import * as vscode from "vscode";
 import Adb, { DeviceClient, Forward } from '@devicefarmer/adbkit';
 import Tracker from '@devicefarmer/adbkit/dist/src/adb/tracker';
@@ -18,7 +18,7 @@ const DEBUG = false;
 
 function logDebug(message?: unknown, ...optionalParams: unknown[]) {
   if (DEBUG) {
-    console.log(message, ...optionalParams); // 使用扩展运算符代替.apply()
+    console.log(message, ...optionalParams);
   }
 }
 
@@ -32,7 +32,7 @@ export class Device extends EventEmitter {
   public id: string;
   private connection: ws.connection;
   public attached: boolean = false;
-  public projectObserser: ProjectObserser;
+  public projectObserser: ProjectObserver;
 
   constructor(connection: ws.connection, type: string, id: string) {
     super();
@@ -350,7 +350,7 @@ export class AutoJsDebugServer extends EventEmitter {
     const startTime = new Date().getTime();
     this.devices.forEach(device => {
       if (device.projectObserser == null || device.projectObserser.folder != folder) {
-        device.projectObserser = new ProjectObserser(folder, this.fileFilter);
+        device.projectObserser = new ProjectObserver(folder, this.fileFilter);
       }
       device.projectObserser.diff()
         .then(result => {
