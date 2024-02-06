@@ -1,22 +1,27 @@
 //
-// Note: This example test is leveraging the Mocha test framework.
-// Please refer to their documentation on https://mochajs.org/ for help.
+// 注意：这个示例测试正在使用 Mocha 测试框架。
+// 请访问 https://mochajs.org/ 来获取帮助信息。
 //
 
-// The module 'assert' provides assertion methods from node
+// 'assert' 模块提供了来自 node 的断言方法
 import * as assert from 'assert';
 
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
-import * as vscode from 'vscode';
-import * as myExtension from '../extension';
-
-// Defines a Mocha test suite to group tests of similar kind together
+// 定义一个 Mocha 测试套件，将相似类型的测试组织在一起
 suite("Extension Tests", () => {
 
-    // Defines a Mocha unit test
+    // 定义一个 Mocha 单元测试
     test("Something 1", () => {
         assert.equal(-1, [1, 2, 3].indexOf(5));
         assert.equal(-1, [1, 2, 3].indexOf(0));
     });
+
+    // 如果您要在未来的测试中使用 `vscode` 和 `myExtension`，
+    // 请在此处添加相关的测试用例
+
+    // 例如：
+    // test("Something 2", () => {
+    //     assert.strictEqual(vscode.window.activeTextEditor, undefined);
+    //     myExtension.activate();
+    //     // 添加更多的断言...
+    // });
 });
