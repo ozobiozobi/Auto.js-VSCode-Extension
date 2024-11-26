@@ -5,6 +5,7 @@ import { ProjectTemplate, Project } from './project';
 
 import * as fs from 'fs'
 import * as path from "path";
+import { Stream } from 'stream';
 
 const server = new AutoJsDebugServer(9317);
 let recentDevice = null;
@@ -385,8 +386,6 @@ class Extension {
     } catch (error) {
       console.error(error);
     }
-
-
   }
 
   newProject() {
@@ -434,6 +433,52 @@ class Extension {
   saveProject(url?) {
     this.sendProjectCommand("save_project", url);
   }
+  async screenshotToPC(){
+    let device = null
+    if (server.devices.length == 0){
+      vscode.window.showInformationMessage("没有连接设备");
+      return;
+    }
+    //只有一个设备的情况,默认选择该设备,否则需要手动选择一个设备
+    if (server.devices.length == 1){
+      device = server.devices[0]
+    }
+    else{
+      this.selectDevice(de => device = de)
+    }
+    if (device.type != 'adb'){
+      //server.getLogChannel(device).appendLine(`请使用adb方式连接`)
+      return
+    }
+    // 获取当前工作空间路径
+    const workspaceFolders = vscode.workspace.workspaceFolders;
+    if (!workspaceFolders || workspaceFolders.length === 0) {
+        vscode.window.showErrorMessage('没有打开的工作空间');
+        return;
+    }
+    const workspacePath = workspaceFolders[0].uri.fsPath;
+    //存放截图路径
+    const resFolderPath = path.join(workspacePath, 'Res/Screenshots');
+    // 判断 res 文件夹是否存在
+    if (!fs.existsSync(resFolderPath)) {
+      fs.mkdirSync(resFolderPath);
+    } 
+    //获取当前的设备对象
+    const adbDevice = server.adbClient.getDevice(device.id)
+    
+    try{
+      const fileName = path.join(resFolderPath,`${Date.now()}.png`);
+      server.getLogChannel(device).appendLine(`开始截图...`)
+      adbDevice.screencap().then((stream:Stream) =>{
+        server.getLogChannel(device).appendLine(`截图成功,传输到电脑中...`)
+        stream.pipe(fs.createWriteStream(fileName))
+        server.getLogChannel(device).appendLine(`已截图至: ${fileName}`)
+      })
+    }
+    catch (error) {
+      server.getLogChannel(device).append(`截图失败: ${error}`)
+    }
+  }
 }
 
 
@@ -441,7 +486,7 @@ export let _context: vscode.ExtensionContext;
 const extension = new Extension();
 const commands = ['startAllServer', 'stopAllServer', 'startServer', 'stopServer', 'startTrackADBDevices',
   'stopTrackADBDevices', 'manuallyConnectADB', 'manuallyDisconnect', 'showServerAddress', 'showQrCode', 'openDocument', 'run', 'runOnDevice',
-  'stop', 'stopAll', 'rerun', 'save', 'saveToDevice', 'newProject', 'runProject', 'saveProject'];
+  'stop', 'stopAll', 'rerun', 'save', 'saveToDevice', 'newProject', 'runProject', 'saveProject','screenshotToPC'];
 
 export function activate(context: vscode.ExtensionContext) {
   console.log('extension "Autox.js-VSCode-Extension " is now active.');

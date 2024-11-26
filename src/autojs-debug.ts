@@ -452,7 +452,7 @@ export class AutoJsDebugServer extends EventEmitter {
   }
 
   /** 获取设备日志打印通道 */
-  private getLogChannel(device: Device): vscode.OutputChannel {
+  getLogChannel(device: Device): vscode.OutputChannel {
     const channelName = device.toString();
     // console.log("获取日志通道：" + channelName);
     return this.logChannels.get(channelName);

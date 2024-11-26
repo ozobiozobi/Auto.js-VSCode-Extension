@@ -1,19 +1,16 @@
-# Autox.js-VSCodeExt
+# Autox.js-VSCodeExt-New
 
 ## 插件背景
-基于[Auto.js-VSCodeExt-Fixed，0.3.8](https://github.com/710850609/Auto.js-VSCode-Extension)版本开发， 主要添加右键【文件夹】保存项目到设备,右键【js文件】运行，js文件中 点击右上角运行脚本，结合webpack，编译打包一气呵成，插件里还有几个功能（如保存普通资源脚本目录等）是以前的代码无法快速实现的。可能修改安卓apk。详细信息请看change log
+适用于Autox.js
+基于[Auto.js-VSCode-Extension](https://github.com/kkevsekk1/Auto.js-VSCode-Extension)版本进行开发。
 
-`注意：`
+## 原注意事项
 
 本插件不能和老版本的 [Auto.js-VSCodeExt-Fixed，0.3.8](https://github.com/710850609/Auto.js-VSCode-Extension) 同时启用，因为使用了同样的 端口。功能会冲突！
 
-[源码仓库](https://github.com/kkevsekk1/Auto.js-VSCode-Extension)
-
-桌面编辑器Visual Studio Code的插件。可以让Visual Studio Code支持[Autox.js](https://github.com/kkevsekk1/AutoX)开发。
-
 ## Install
 
-在VS Code中菜单"查看"->"扩展"->输入"Autox.js"搜索，即可看到"Autox.js-VSCodeExt"插件，安装即可。插件的更新也可以在这里更新。
+在VS Code中菜单"查看"->"扩展"->输入"Autox.js-"搜索，即可看到"Autox.js-VSCodeExt-New"插件，安装即可。插件的更新也可以在这里更新。
 
 ## Features
 
@@ -44,6 +41,23 @@
 
 在确保手机已经在开发者选项中打开USB调试后，在[Autox.js](https://github.com/kkevsekk1/AutoX)的侧拉菜单中启用ADB调试，再使用数据线连接电脑，插件会自动识别设备。
 
+#### 3. WIFI调试(ADB):
+1.在[Autox.js](https://github.com/kkevsekk1/AutoX)侧拉菜单中启用USB调试
+
+2.手机与电脑保持在同一局域网,首先将手机连接到电脑,开启USB调试,输入
+
+`adb tcpip 5555`
+
+`adb connect 192.*.*.*`
+
+部分手机会弹出授权窗口,连接成功后拔掉数据线,再输入
+
+`adb disconnect`
+
+`adb connect 192.*.*.*`
+
+成功连接后就可以使用WIFI(ADB)调试,然后使用命令: 开启服务并监听ADB设备(Start all server),将会自动连接手机。
+
 ### Step 3
 之后就可以在电脑上编辑JavaScript文件并通过命令`Run`或者按键`F5`在手机上运行了。
 
@@ -71,40 +85,18 @@
 * 新建项目(New Project)： 选择一个空文件夹（或者在文件管理器中新建一个空文件夹），将会自动创建一个项目
 * 运行项目(Run Project)： 运行一个项目，需要Auto.js 4.0.4Alpha5以上支持
 * 保存项目到设备(Save Project)： 保存一个项目，需要Auto.js 4.0.4Alpha5以上支持
+* 截图至PC(Screenshot to PC): 将手机实时屏幕截图到当前项目的Res/Screenshots文件夹中,仅支持ADB调试的设备
 
 以上命令一些有对应的快捷键，参照命令后面的说明即可。
 
-
-# 以下是原插件开发日志，二次开发变更日志请在`更改日志`查看
-## Log
-
-
 要显示来自Auto.js的日志，打开 VS Code上面菜单的"帮助"->"切换开发人员工具"->"Console"即可。
 
-## Release Notes
+## 更新日志
+### 1.110.0 
+1.增加截图至PC功能
 
-### 0.0.1
+快捷键
 
-首次发布。包含以下特性：
-* 启动，停止服务
-* 显示Auto.js的日志
-* 运行，停止，重新运行脚本
-* 多设备连接支持，允许在运行时选择要运行的设备
+Windows: `Ctrl+Shift+A`
 
-### 0.0.2
-增加以下特性：
-* 脚本保存到设备
-
-### 0.2.0 
-增加以下特性：
-* New Project（新建项目）：选择一个空文件夹（或者在文件管理器中新建一个空文件夹），将会自动创建一个项目
-* Run Project（运行项目）：运行一个项目，需要Auto.js 4.0.4Alpha5以上支持
-* Save Project（保存项目）：保存一个项目，需要Auto.js 4.0.4Alpha5以上支持
-
------------------------------------------------------------------------------------------------------------
-
-### For more information
-
-* [Github repo](https://github.com/kkevsekk1/Auto.js-VSCode-Extension)
-
-**Enjoy!**
+Mac: `Command+Shift+A`

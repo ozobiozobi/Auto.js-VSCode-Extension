@@ -1,13 +1,13 @@
 {
   "name": "auto-js-vsce-fixed",
-  "displayName": "Auto.js-Autox.js-VSCodeExt",
+  "displayName": "Auto.js-Autox.js-VSCodeExt-New",
   "description": "用于在pc上vscode中开发autoxjs的自动化脚本的插件。兼容autojs 和autoxjs,增加功能：usb方式adb进行连接; 右键【文件夹】保存项目到设备;右键【js文件】运行;js文件中点击右上角运行; 结合webpack自动编译，js自动运行到手机",
-  "version": "1.109.0",
+  "version": "1.110.0",
   "publisher": "aaroncheng",
   "icon": "logo.png",
   "repository": {
     "type": "github",
-    "url": "https://github.com/kkevsekk1/Auto.js-VSCode-Extension"
+    "url": "https://github.com/ZG1711/Auto.js-VSCode-Extension"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -167,6 +167,11 @@
         "command": "extension.runProject",
         "title": "运行项目(Run Project)",
         "category": "Auto.js autoxjs"
+      },
+      {
+        "command": "extension.screenshotToPC",
+        "title": "截屏到PC(Screenshot to PC)",
+        "category": "Auto.js autoxjs"
       }
     ],
     "keybindings": [
@@ -204,6 +209,12 @@
         "command": "extension.save",
         "key": "ctrl+shift+S",
         "mac": "cmd+shift+S",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "extension.screenshotToPC",
+        "key": "ctrl+shift+S",
+        "mac": "cmd+shift+A",
         "when": "editorTextFocus"
       }
     ]
