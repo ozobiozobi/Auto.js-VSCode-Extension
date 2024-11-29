@@ -3,12 +3,13 @@
 All notable changes to the "auto-js-vscodeext-fixed" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
-### 1.109.1
+
+### 1.110.1
 
 优化以下特性:
 - 修复截图保存创建路径失败问题
 
-### 1.109.0
+### 1.110.0
 - 增加截图至PC,需要使用ADB调试连接的方式使用
 
 ### 1.109.0
