@@ -4,3 +4,4 @@ node_modules
 .idea
 token.txt
 *.vsix
+*.DS_Store

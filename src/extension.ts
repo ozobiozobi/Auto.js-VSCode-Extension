@@ -447,7 +447,7 @@ class Extension {
       this.selectDevice(de => device = de)
     }
     if (device.type != 'adb'){
-      //server.getLogChannel(device).appendLine(`请使用adb方式连接`)
+      vscode.window.showErrorMessage(`请使用adb方式连接`)
       return
     }
     // 获取当前工作空间路径
@@ -461,7 +461,13 @@ class Extension {
     const resFolderPath = path.join(workspacePath, 'Res/Screenshots');
     // 判断 res 文件夹是否存在
     if (!fs.existsSync(resFolderPath)) {
-      fs.mkdirSync(resFolderPath);
+      try{
+        fs.mkdirSync(resFolderPath,{recursive: true});
+      }
+      catch (error) {
+        vscode.window.showErrorMessage(`创建: ${resFolderPath} 失败,请手动创建`);
+        return;
+      }
     } 
     //获取当前的设备对象
     const adbDevice = server.adbClient.getDevice(device.id)

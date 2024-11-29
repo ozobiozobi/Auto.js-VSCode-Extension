@@ -3,6 +3,13 @@
 All notable changes to the "auto-js-vscodeext-fixed" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+### 1.109.1
+
+优化以下特性:
+- 修复截图保存创建路径失败问题
+
+### 1.109.0
+- 增加截图至PC,需要使用ADB调试连接的方式使用
 
 ### 1.109.0
 - 添加心跳检测（需要Autox.js 6.2.9 版本以上才会启用）
