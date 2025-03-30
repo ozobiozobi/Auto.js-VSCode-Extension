@@ -1,251 +1,251 @@
 {
-  "name": "auto-js-vsce-fixed-new",
-  "displayName": "Autox.js-VSCodeExt-New",
-  "description": "用于在pc上vscode中开发autoxjs的自动化脚本的插件。兼容autojs 和autoxjs,增加功能：usb方式adb进行连接; 右键【文件夹】保存项目到设备;右键【js文件】运行;js文件中点击右上角运行; 结合webpack自动编译，js自动运行到手机",
-  "version": "1.110.1",
-  "publisher": "zhong",
-  "icon": "logo.png",
-  "repository": {
-    "type": "github",
-    "url": "https://github.com/ZG1711/Auto.js-VSCode-Extension"
-  },
-  "engines": {
-    "vscode": "^1.85.0"
-  },
-  "categories": [
-    "Other"
-  ],
-  "activationEvents": [],
-  "main": "./out/extension",
-  "contributes": {
-    "snippets": [
-      {
-        "language": "javascript",
-        "path": "./snippets/autojs.json"
-      }
-    ],
-    "breakpoints": [
-      {
-        "language": "javascript"
-      }
-    ],
-    "menus": {
-      "editor/title": [
-        {
-          "when": "resourceLangId == javascript",
-          "command": "extension.openDocument",
-          "group": "navigation@2"
-        },
-        {
-          "when": "resourceLangId == javascript",
-          "command": "extension.run",
-          "group": "navigation@1"
-        }
-      ],
-      "explorer/context": [
-        {
-          "when": "explorerResourceIsFolder",
-          "command": "extension.saveProject",
-          "group": "navigation"
-        },
-        {
-          "when": "!explorerResourceIsFolder&&resourceExtname==.js",
-          "command": "extension.rerun",
-          "group": "navigation@1"
-        },
-        {
-          "when": "!explorerResourceIsFolder",
-          "command": "extension.save",
-          "group": "navigation@2"
-        }
-      ]
+    "name": "auto-js-vsce-fixed-new",
+    "displayName": "Autox.js-VSCodeExt-New",
+    "description": "用于在pc上vscode中开发autoxjs的自动化脚本的插件。兼容autojs 和autoxjs,增加功能：usb方式adb进行连接; 右键【文件夹】保存项目到设备;右键【js文件】运行;js文件中点击右上角运行; 结合webpack自动编译，js自动运行到手机",
+    "version": "1.110.1",
+    "publisher": "ozobi",
+    "icon": "logo.png",
+    "repository": {
+        "type": "github",
+        "url": "https://github.com/ozobiozobi/Auto.js-VSCode-Extension"
     },
-    "commands": [
-      {
-        "command": "extension.openDocument",
-        "title": "打开文档(Open Document)",
-        "icon": "logo.png",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.showQrCode",
-        "title": "显示服务端二维码(Show qr code)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.showServerAddress",
-        "title": "显示服务端ip地址(Show server address)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.startAllServer",
-        "title": "开启服务并监听ADB设备(Start all server), 如有多个同类插件，请禁用其他或本插件",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.stopAllServer",
-        "title": "停止服务并停止监听ADB设备(Stop all server)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.startServer",
-        "title": "开启服务(Start Server), 如有多个同类插件，请禁用其他或本插件",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.stopServer",
-        "title": "停止服务(Stop Server)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.startTrackADBDevices",
-        "title": "开始监听ADB设备(Start track adb devices)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.stopTrackADBDevices",
-        "title": "停止监听ADB设备(Stop track adb devices)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.manuallyConnectADB",
-        "title": "手动连接ADB设备(Manually connect adb device)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.manuallyDisconnect",
-        "title": "手动关闭设备连接(Manually disconnect device)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.run",
-        "title": "运行脚本(Run)",
-        "icon": "play.png",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.runOnDevice",
-        "title": "在指定设备运行脚本(Run On Device)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.stop",
-        "title": "停止当前脚本(Stop)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.stopAll",
-        "title": "停止所有脚本(Stop All)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.rerun",
-        "title": "重新运行(Rerun)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.save",
-        "title": "保存到所有设备(Save)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.saveToDevice",
-        "title": "保存到指定设备(Save On Device)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.newProject",
-        "title": "新建项目(New Project)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.saveProject",
-        "title": "保存项目到设备(Save Project)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.runProject",
-        "title": "运行项目(Run Project)",
-        "category": "Auto.js autoxjs"
-      },
-      {
-        "command": "extension.screenshotToPC",
-        "title": "截屏到PC(Screenshot to PC)",
-        "category": "Auto.js autoxjs"
-      }
+    "engines": {
+        "vscode": "^1.85.0"
+    },
+    "categories": [
+        "Other"
     ],
-    "keybindings": [
-      {
-        "command": "extension.openDocument",
-        "key": "f4",
-        "mac": "f4",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "extension.run",
-        "key": "f5",
-        "mac": "f5",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "extension.stop",
-        "key": "shift+f5",
-        "mac": "shift+f5",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "extension.runOnDevice",
-        "key": "ctrl+f5",
-        "mac": "cmd+f5",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "extension.rerun",
-        "key": "ctrl+shift+f5",
-        "mac": "cmd+shift+f5",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "extension.save",
-        "key": "ctrl+shift+S",
-        "mac": "cmd+shift+S",
-        "when": "editorTextFocus"
-      },
-      {
-        "command": "extension.screenshotToPC",
-        "key": "ctrl+shift+S",
-        "mac": "cmd+shift+A",
-        "when": "editorTextFocus"
-      }
-    ]
-  },
-  "scripts": {
-    "vscode:prepublish": "npm run compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
-    "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
-  },
-  "devDependencies": {
-    "@types/mocha": "^10.0.6",
-    "@types/node": "20.x",
-    "@types/vscode": "^1.85.0",
-    "@typescript-eslint/eslint-plugin": "^6.20.0",
-    "@typescript-eslint/parser": "^6.20.0",
-    "eslint": "^8.56.0",
-    "typescript": "^5.3.3"
-  },
-  "dependencies": {
-    "@devicefarmer/adbkit": "^3.2.6",
-    "@types/archiver": "^6.0.2",
-    "@types/stream-buffers": "^3.0.7",
-    "@types/walk": "^2.3.4",
-    "@types/websocket": "^1.0.10",
-    "archiver": "^6.0.1",
-    "stream-buffers": "^3.0.2",
-    "walk": "^2.3.15",
-    "websocket": "1.0.34"
-  },
-  "__npminstall_done": false
+    "activationEvents": [],
+    "main": "./out/extension",
+    "contributes": {
+        "snippets": [
+            {
+                "language": "javascript",
+                "path": "./snippets/autojs.json"
+            }
+        ],
+        "breakpoints": [
+            {
+                "language": "javascript"
+            }
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "when": "resourceLangId == javascript",
+                    "command": "extension.openDocument",
+                    "group": "navigation@2"
+                },
+                {
+                    "when": "resourceLangId == javascript",
+                    "command": "extension.run",
+                    "group": "navigation@1"
+                }
+            ],
+            "explorer/context": [
+                {
+                    "when": "explorerResourceIsFolder",
+                    "command": "extension.saveProject",
+                    "group": "navigation"
+                },
+                {
+                    "when": "!explorerResourceIsFolder&&resourceExtname==.js",
+                    "command": "extension.rerun",
+                    "group": "navigation@1"
+                },
+                {
+                    "when": "!explorerResourceIsFolder",
+                    "command": "extension.save",
+                    "group": "navigation@2"
+                }
+            ]
+        },
+        "commands": [
+            {
+                "command": "extension.openDocument",
+                "title": "打开文档(Open Document)",
+                "icon": "logo.png",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.showQrCode",
+                "title": "显示服务端二维码(Show qr code)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.showServerAddress",
+                "title": "显示服务端ip地址(Show server address)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.startAllServer",
+                "title": "开启服务并监听ADB设备(Start all server), 如有多个同类插件，请禁用其他或本插件",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.stopAllServer",
+                "title": "停止服务并停止监听ADB设备(Stop all server)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.startServer",
+                "title": "开启服务(Start Server), 如有多个同类插件，请禁用其他或本插件",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.stopServer",
+                "title": "停止服务(Stop Server)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.startTrackADBDevices",
+                "title": "开始监听ADB设备(Start track adb devices)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.stopTrackADBDevices",
+                "title": "停止监听ADB设备(Stop track adb devices)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.manuallyConnectADB",
+                "title": "手动连接ADB设备(Manually connect adb device)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.manuallyDisconnect",
+                "title": "手动关闭设备连接(Manually disconnect device)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.run",
+                "title": "运行脚本(Run)",
+                "icon": "play.png",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.runOnDevice",
+                "title": "在指定设备运行脚本(Run On Device)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.stop",
+                "title": "停止当前脚本(Stop)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.stopAll",
+                "title": "停止所有脚本(Stop All)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.rerun",
+                "title": "重新运行(Rerun)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.save",
+                "title": "保存到所有设备(Save)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.saveToDevice",
+                "title": "保存到指定设备(Save On Device)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.newProject",
+                "title": "新建项目(New Project)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.saveProject",
+                "title": "保存项目到设备(Save Project)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.runProject",
+                "title": "运行项目(Run Project)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.screenshotToPC",
+                "title": "截屏到PC(Screenshot to PC)",
+                "category": "Auto.js autoxjs"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "extension.openDocument",
+                "key": "f4",
+                "mac": "f4",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.run",
+                "key": "f5",
+                "mac": "f5",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.stop",
+                "key": "shift+f5",
+                "mac": "shift+f5",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.runOnDevice",
+                "key": "ctrl+f5",
+                "mac": "cmd+f5",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.rerun",
+                "key": "ctrl+shift+f5",
+                "mac": "cmd+shift+f5",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.save",
+                "key": "ctrl+shift+S",
+                "mac": "cmd+shift+S",
+                "when": "editorTextFocus"
+            },
+            {
+                "command": "extension.screenshotToPC",
+                "key": "ctrl+shift+S",
+                "mac": "cmd+shift+A",
+                "when": "editorTextFocus"
+            }
+        ]
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/mocha": "^10.0.6",
+        "@types/node": "^20.17.28",
+        "@types/vscode": "^1.85.0",
+        "@typescript-eslint/eslint-plugin": "^6.20.0",
+        "@typescript-eslint/parser": "^6.20.0",
+        "eslint": "^8.56.0",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "@devicefarmer/adbkit": "^3.2.6",
+        "@types/archiver": "^6.0.2",
+        "@types/stream-buffers": "^3.0.7",
+        "@types/walk": "^2.3.4",
+        "@types/websocket": "^1.0.10",
+        "archiver": "^6.0.1",
+        "stream-buffers": "^3.0.2",
+        "walk": "^2.3.15",
+        "websocket": "1.0.34"
+    },
+    "__npminstall_done": false
 }
