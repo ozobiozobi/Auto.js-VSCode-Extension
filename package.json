@@ -7,7 +7,7 @@
     "icon": "logo.png",
     "repository": {
         "type": "github",
-        "url": "https://github.com/ZG1711/Auto.js-VSCode-Extension"
+        "url": "https://github.com/ozobiozobi/Auto.js-VSCode-Extension"
     },
     "engines": {
         "vscode": "^1.85.0"
