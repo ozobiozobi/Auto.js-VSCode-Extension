@@ -7,7 +7,7 @@
     "icon": "logo.png",
     "repository": {
         "type": "github",
-        "url": "https://github.com/ozobiozobi/Auto.js-VSCode-Extension"
+        "url": "https://github.com/ZG1711/Auto.js-VSCode-Extension"
     },
     "engines": {
         "vscode": "^1.85.0"
@@ -65,6 +65,21 @@
                 "command": "extension.openDocument",
                 "title": "打开文档(Open Document)",
                 "icon": "logo.png",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.goScoper",
+                "title": "vscode 访问 goScoper(Open goScoper)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.openGoScoperFolder",
+                "title": "打开 goScoper 文件夹(Open goScoper folder)",
+                "category": "Auto.js autoxjs"
+            },
+            {
+                "command": "extension.captureToGoScoper",
+                "title": "截图上传到 goScoper(captureToGoScoper)",
                 "category": "Auto.js autoxjs"
             },
             {
@@ -229,7 +244,7 @@
     },
     "devDependencies": {
         "@types/mocha": "^10.0.6",
-        "@types/node": "^20.17.28",
+        "@types/node": "20.x",
         "@types/vscode": "^1.85.0",
         "@typescript-eslint/eslint-plugin": "^6.20.0",
         "@typescript-eslint/parser": "^6.20.0",
@@ -247,5 +262,9 @@
         "walk": "^2.3.15",
         "websocket": "1.0.34"
     },
-    "__npminstall_done": false
+    "__npminstall_done": false,
+    "__metadata": {
+        "installedTimestamp": 1743157013153,
+        "size": 12224837
+    }
 }
