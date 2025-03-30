@@ -4,15 +4,17 @@ All notable changes to the "auto-js-vscodeext-fixed" extension will be documente
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
-### 1.110.1
+### 1.110.2
 
-添加: goScoper(L.)
+(L.)添加: goScoper
 
 -   打开 goScoper 文件夹(Open goScoper folder)
 
 -   vscode 访问 goScoper(Open goScoper)
 
 -   截图上传到 goScoper(captureToGoScoper)
+
+### 1.110.1
 
 优化以下特性:
 

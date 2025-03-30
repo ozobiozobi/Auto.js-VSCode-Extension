@@ -7,7 +7,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { Stream } from "stream";
 import { exec } from "child_process";
-import * as os from "os";
+import os from "os";
 
 const server = new AutoJsDebugServer(9317);
 let recentDevice = null;
